@@ -1,0 +1,24 @@
+Statistics
+- Ignore Strategy Tester statistics, because it does not group multiple orders into the same trade
+- Walkthrough statistics
+    - All statistics are calculated taking into account required capital
+
+
+
+Basic version:
+- Deal start condition: built in RSI-7 or external indicator
+(main purpose of this strategy is to connect your own studies)
+- Base order and safety orders similar to 3commas
+(order size, percent deviation, safety orders, percent scale and volume scale)
+- Support for Long strategy for now
+- Statistics that group all position in the same deal (base order + safety orders are the same deal)
+
+
+Advanced version:
+- Stop loss at % from base order
+- Support for both Long or Short direction
+- Limit date range of backtest
+- Take profit type
+- Steps table similar to 3commas
+
+

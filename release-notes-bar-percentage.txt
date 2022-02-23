@@ -1,0 +1,12 @@
+This script will add text to bars showing the price change of the bar as percentage, both for open/close and high/low.
+It can be used to better get an ideea of how the price moved at a previous point in time.
+Script uses labels for text, as there is a maximum limitation of using 500 labels if you want to study price movement for a specific timeframe, you can limit the timeframe
+from the script settings. Keep in mind that labels are applied to the last 500 candles of any timeframe.
+Script also displays maximum statistics for the selected time period, for both green and red candles both as percentage and basecurrency absolute value.
+
+Uses:
+- Study the behaviour of an asset under previous market conditions, black swan events a.s.o.
+- Calculate leverage position risk versus extreme price movements
+Example: ZENUSDT pumped ~35% on 15 Sep 2021 in the first seconds after the news on getting listed on Coinbase so shorts with 3x leverage would have been liquidated.
+
+

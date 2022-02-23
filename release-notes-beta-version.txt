@@ -1,0 +1,23 @@
+-------- !!! WARNING - BETA VERSION !!! --------
+This means this script version is not tested enough and was released for testing only. Please test and provide feedback on our discord server.
+------------------------------------------------
+
+MAJOR UPDATE:
+- Update to Pinescript v5
+- MAJOR refactor for the logic of how orders are placed. BO order is placed when the condition is first encountered and we are not in a deal.
+The extra SO orders (if based on price movement) are all placed on the next candle after BO order, instead of each being placed one after another.
+Take profit (if percentage) and Stop loss are placed on the first candle after BO order because if BO and TP are on the same candle TV does not execute properly.
+These changes should improve strategy accuracy when multiple prices are hit by the same candle.
+- NEW FEATURE: Support for Stop deal using an external indicator (i.e. stop long deal when RSI > 80)
+- NEW FEATURE: Support for Safety orders using an external indicator (i.e. trigger each additional SO when RSI < 10, regardless of price movement)
+The SO size is calculated taking into consideration the step volume scale.
+If using external indicator this does not guarantee a smalle price as wellas the price value logic should be implemented in the external indicator.
+- NEW FEATURE: Safety order command for 3commas bot. This is implemented using "Add funds in the quote currency" (for pair BTCUSDT the quote currency is USDT)
+The SO size is calculated taking into consideration the volume , for exact order size (and price) use the built-in Steps table.
+In order to use this make sure your 3 commas bot is single pair and has 0 number for SO orders, as all funds will be added to the trade via webhook calls.
+- NEW FEATURE: Addition of extra columns to the steps table: Required price for TP, Required % change for TP, Required % change for BEP (Breakeven point)
+
+
+
+
+Join our discord server and kindly ask for access. Please remember that access to private scripts is a privilege and not a right.

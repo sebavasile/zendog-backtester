@@ -1,0 +1,117 @@
+Hi everyone,
+After a few iterations and additional implemented features this version of the Backtester is now open source.
+
+The Strategy is a Backtester for 3commas DCA bots. The main usage scenario is to plugin your external indicator, and backtest it using different DCA settings.
+Before using this script please make sure you read these explanations and make sure you understand how it works.
+
+Features:
+- Because of Tradingview limitations on how orders are grouped into Trades, this Strategy statistics are calculated by the script, so please ignore the Strategy Tester statistics completely
+Statistics Table explained:
+    - Status: either all deals are closed or there is a deal still running, in which case additional info
+    is provided below, as when the deal started, current PnL, current SO
+    - Finished deals: Total number of closed deals both Winning and Losing.
+    A deal is comprised as the Base Order (BO) + all Safety Orders (SO) related to that deal, so this number
+    will be different than the Strategy Tester List of Trades
+    - Winning Deals: Deal ended in profit
+    - Losing deals: Deals ended with loss due to Stop Loss. In the future I might add a Deal Stop condition to
+    the script, so that will count towards this number as well.
+    - Total days ( Max / Avg days in Deal ):
+    Total Days in the Backtest given by either Tradingview limitation on the number of candles or by the
+    config of the script regarding "Limit Date Range".
+    Max Days spent in a deal + which period this happened.
+    Avg days spent in a deal.
+    - Required capital: This is the total capital required to run the Backtester and it is automatically calculated by
+    the script taking into consideration BO size, SO size, SO volume scale. This should be the same as 3commas.
+    This number overwrites strategy.initial_capital and is used to calculate Profit and other stats, so you don't need
+    to update strategy.initial_capital every time you change BO/SO settings
+    - Profit after commission
+    - Buy and Hold return: The PnL that could have been obtained by buying at the close of the first candle of the
+    backtester and selling at the last.
+    - Covered deviation: The % of price move from initial BO order covered by SO settings
+    - Max Deviation: Biggest market % price move vs BO price, in the other direction (for long
+    is down, for short it is up)
+    - Max Drawdown: Biggest market % price move vs Avg price of the whole Trade (BO + any SO), in the other
+    direction (for long price goes down, for short it goes up)
+    This is calculated for the whole Trade so it is different than List of Trades
+    - Max / Avg bars in deal
+    - Total volume / Commission calculated by the strategy. For correct commission please set Commission in the
+    Inputs Tab and you may ignore Properties Tab
+    - Close stats for deals: This is a list of how many Trades were closed at each step, including Stop Loss (if
+    configured), together with covered deviation for that step, the number of deals, and the percentage of this
+    number from all the deals
+    TODO: Might add deal avg value for each step
+
+- Settings Table that can be enabled / disabled just to have an overview of your configs on the chart, this is a
+drawn on bottom left
+
+- Steps Table similar to 3commas, this is also drawn on bottom left, so please disable Settings table if you want
+to see this one
+TODO: Might add extra stats here
+
+- Deal start condition: built in RSI-7 or plugin any external indicator and compare with any value the indicator plots
+(main purpose of this strategy is to connect your own studies, so using external indicator is recommended)
+
+- Base order and safety orders configs similar to 3commas (order size, percent deviation, safety orders,
+percent scale and volume scale)
+
+- Long and Short
+
+- Stop Loss
+
+- Support for Take profit from base order or from Total volume of the deal
+
+- Configs help (besides self explanatory):
+    - Chart theme: Adjust according to the theme you run on. There is no way to detect theme at the moment.
+    This adjust different colors
+    - Deal Start Type: Either a builtin RSI7 or "External indicator"
+    - Indicator Source an value: If using External Indicator then select source, comparison and value.
+    For example you could start a deal when Volume is greater than xxxx, or code a custom indicator that plots
+    different values based on your conditions and test those values
+    - Visuals / Decimals for display: Adjust according to your symbol
+    - BO Entry Price for steps table: This is the BO start deal price used to calculate the steps in the table
+
+
+----- NEW RELEASE 10 Sep 2021
+MAJOR UPDATE! Use new features with caution.
+
+New Features (see details below):
+- Auto Trading feature for 3commas bot.
+- PLAN-B,  use an alternate price to exit deal when stuck for X amount of time
+
+Other changes:
+- Refactored exit trades: now using strategy.order() with opposite market direction instead of strategy.exit(), because using separate strategy.exit() for stop loss and take profit didn't work properly. The combination would not allow separating the logic for each, which was required in order to empower the "Auto Trading" feature to only execute specific order types
+- Refactored PnL calculation
+- UI adjustments
+
+Feature Auto Trading
+---- WARNING! ----
+- Use this feature at your own risk. Test accordingly on the paper account before using any real money.
+- This feature may have bugs that might lead to improper order execution, we're not responsible for any such incidents and losses incurred
+- This strategy will not execute Safety Orders, as for now, they're not supported by 3commas via their Webhook API
+- READ THIS: https://www.tradingview.com/support/solutions/43000481368-strategy-alerts/
+
+---- Possible reasons this may not work as expected ----
+Here is a list of possible scenarios (some encountered during tests) that will create differences between live executed orders and the orders drawn on the chart.
+- problems with Tradingview infrastructure that will lead to webhooks not being executed
+- problems with 3commas infrastructure that will make API calls not being executed on the exchange
+- there is no data connection between Tradingview and 3commas, so the strategy is not aware of your current live positions and their status, position size, account balance a.s.o. These may lead to the so-called split-brain when the bot executes differently than what the strategy draws on the chart
+- there are almost always price differences between Tradingview and 3commas, updates to prices on 3commas are delayed vs the market price, so this may lead to situations when the deal opened at a different price vs chart, so the Take Profit % will also mean a different price and a different % amount, plus any other scenarios you may image. Another possibility is that bots on 3commas may miss spike candles, or that the bot executes at a big difference vs market price
+
+---- HOW TO use the feature ----
+1. Check the  "Enable Bot Control Via Webhook"
+2. Complete Bot Id and Email token (you may take them from the JSON from 3commas)
+3. Select which events will make the bot trigger orders, choices are Deal Start, Take profit, Stop loss, PLAN-B Timeout, so you may want to use the Auto Trading feature to stop deals under specific conditions (Stop loss, Timeout)
+4. Configure DCA Settings to your linking
+5. If you have multiple Safety Orders make sure to replicate the same settings in 3commas, as the strategy DOES NOT trigger safety order calls
+6. The strategy may depend on external indicators to trigger actions, make sure they are also properly configured on your chart
+7. Once the strategy and other indicators are configured, create an alert on the strategy, select "Order fills only" and in the "Message box" input {{strategy.order.alert_message}}
+8. If you want to receive informative alerts as well, you may add a secondary alert on the strategy and select "alert() function calls only". This will provide alerts about the deal start, safety order steps, take profit, stop loss, timeout, including deal PnL. Some alerts are delayed as they will get executed only on the candle close, this feature is informative only.
+9. If you change any setting or code you need to re-create alerts as well, this is how Tradingview works
+
+Feature PLAN-B
+While running deals you notice that the market conditions have changed, or simply that the deal takes longer than usual to close, so what do you do now? Close the deal on the spot? Willing to take a small loss, but less than the stop loss? Close the deal as soon as it is breakeven?
+It is time for PLAN-B.
+With PLAN-B you may configure a time-based condition (more conditions to come) together with an action to "close deal" based on an alternate %, either negative for a price less than the average price, or positive for price higher than deal avg price.
+If you want to see this feature just draw on the chart without executing orders, you may select "paint only" for the action, this could benefit further backtesting scenarios.
+PLAN-B executes at the given price or better, not at the given price or worse, so it works similar to take profit, not as stop loss, but this approach may change in the future.
+PLAN-B may be used together with "Auto Trading" to exit deals using an alternative price percentage.
